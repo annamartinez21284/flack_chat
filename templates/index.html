@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+
+
+  
+{% block body %}
+
+<body class="text-center">
+  <form class="form-signin"  type="submit" id="new">
+    <img class="mb-1" src="https://img.icons8.com/bubbles/50/000000/chat.png" alt="" width="60" height="60">
+    <h1 class="h3 mb-3 font-weight-normal">Welcome to Flack!</h1>
+    <h2 class="h5 mb-3 font-weight-normal">Please choose a display name</h2>
+    <label for="display_name" class="sr-only">Display name</label>
+    <input type="text" id="display_name" class="form-control" placeholder="Display name" required autofocus>
+    <button  class="btn btn-lg btn-primary btn-block" type="submit" method="post">Enter</button>
+    <p class="mt-5 mb-3 text-muted"><small>Developed by Anna Martinez for CS50W 2020</small></p>
+  </form>
+</body>
+
+{% endblock %}

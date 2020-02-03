@@ -1,0 +1,102 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+
+    <title>Flack CS50W P2 Chat</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://getbootstrap.com/docs/4.4/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <!-- Custom styles for this template -->
+    <link href="https://getbootstrap.com/docs/4.4/examples/navbar-fixed/navbar-top-fixed.css" rel="stylesheet">
+    <link href="/static/css/styles.css" rel="stylesheet">
+  </head>
+
+  <script>
+  // Load display name
+  document.addEventListener('DOMContentLoaded', () => {
+      document.querySelector('#display_name').innerHTML = localStorage.getItem('display_name');
+    });
+
+
+  </script>
+
+<body>
+  <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+    <a class="navbar-brand" >Flack CS50W</a>
+    <a class="navbar-text">    Logged in as <div id="display_name"></div> </a>
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+        <button class="nav-item ml-auto" href="" >Exit</button>
+    </div>
+  </nav>
+
+<main role="main" class="mycontainer" background-color="yellow">
+  <div class="row">
+    <div class="col-sm">
+      <form>
+        <label for="create_channel"><h4>Create a new channel</h4></label>
+        <div class="input-group mb-3">
+          <input type="text" class="form-control" placeholder="Select a channel name" aria-describedby="button-addon2">
+          <div class="input-group-append">
+            <button class="btn btn-secondary" type="submit" id="button-addon2">Create</button>
+          </div>
+        </div>
+      </form>
+
+      <form>
+        <div class="form-group">
+          <label for="exampleFormControlSelect2"><h4>Select existing channel</h4></label>
+          <select multiple class="form-control" id="exampleFormControlSelect2">
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Select</button>
+      </form>
+
+
+    </div>
+
+    <div class="col-sm">
+
+      <div class="jumbotron">
+        <h4 >Chat on Channel: XXXXX</h4>
+
+        <div class="scrollarea">
+          <div class="container">
+            <p>Hello. How are you today?bbbbbbbbbbbbbbbbbbbbaaa bla bla bal bla</p>
+            <span class="time-right">11:00</span>
+          </div>
+
+          <div class="container darker">
+            <p>Hey! I'm fine. Thanks for asking!</p>
+            <span class="time-left">11:01</span>
+          </div>
+
+        </div>
+
+        <br>
+        <form>
+          <br>
+          <div class="input-group mb-3">
+            <textarea type="text" class="form-control" placeholder="New message" aria-describedby="button-addon2"> </textarea>
+            <div class="input-group-append">
+              <button class="btn btn-secondary" type="submit" id="button-addon2">Send</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+</body>
+</html>

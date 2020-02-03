@@ -1,0 +1,55 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+
+    <title>Flack CS50W P2</title>
+
+    <link rel="canonical" href="https://getbootstrap.com/docs/4.0/examples/sign-in/">
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://getbootstrap.com/docs/4.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="https://getbootstrap.com/docs/4.0/examples/sign-in/signin.css" rel="stylesheet">
+    <link href="https://getbootstrap.com/docs/4.4/examples/sign-in/signin.css" rel="stylesheet">
+
+    <script>
+      // if the user already has a display name, redirect to chat
+      function hello () {alert("HELLO HELLO");}
+      if (localStorage.getItem('display_name'))
+        { alert("TESTING TESTING");
+          window.location.replace('chat.html');
+        localStorage.setItem('display_name');}
+        // ... ->then in chat.html set name in the DOM
+
+        // if not, get chosen display_name and set it
+      else {
+        document.addEventListener('DOMContentLoaded', function () {
+          document.querySelector('#new').onsubmit = function () {
+
+                      alert("TEST TEST");
+
+            const dname = document.querySelector('#display_name').value;
+            localStorage.setItem('display_name', dname);
+            window.location.replace('chat.html');
+          };
+
+        });
+
+      }
+
+
+    </script>
+
+  </head>
+
+  {% block body %}
+  {% endblock %}
+
+</html>
