@@ -1,7 +1,8 @@
 {% extends "layout.html" %}
 
 
-  
+
+
 {% block body %}
 
 <body class="text-center">
@@ -15,5 +16,29 @@
     <p class="mt-5 mb-3 text-muted"><small>Developed by Anna Martinez for CS50W 2020</small></p>
   </form>
 </body>
+
+<script>
+  // if the user already has a display name, redirect to chat
+  if (localStorage.getItem('display_name'))
+    { alert("TESTING TESTING");
+      window.location.assign('/chat');
+    localStorage.setItem('display_name');}
+    // ... ->then in chat.html set name in the DOM
+
+    // if not, get chosen display_name and set it
+  else {
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelector('#new').onsubmit = function () {
+        const dname = document.querySelector('#display_name').value;
+        localStorage.setItem('display_name', dname);
+        window.location.replace('/chat');
+      };
+
+    });
+
+  }
+
+
+</script>
 
 {% endblock %}
