@@ -20,8 +20,7 @@
 <script>
   // if the user already has a display name, redirect to chat
   if (localStorage.getItem('display_name'))
-    { alert("TESTING TESTING");
-      window.location.assign('/chat');
+    { window.location.assign('/chat');
     localStorage.setItem('display_name');}
     // ... ->then in chat.html set name in the DOM
 

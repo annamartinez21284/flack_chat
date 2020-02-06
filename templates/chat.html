@@ -15,7 +15,7 @@
     <link href="https://getbootstrap.com/docs/4.4/examples/navbar-fixed/navbar-top-fixed.css" rel="stylesheet">
     <link href="/static/css/styles.css" rel="stylesheet">
 
-    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
     <script src="{{ url_for('static', filename='chat.js') }}"></script>
   </head>
 
@@ -34,10 +34,11 @@
   <div class="row">
     <div class="col-sm">
       <br>
+
       <form id="new_channel">
         <label for="create_channel"><h4>Create a new channel</h4></label>
         <div class="input-group mb-3">
-          <input type="text" class="form-control" placeholder="Select a channel name" aria-describedby="button-addon2" id="new_channel_name">
+          <input type="text" class="form-control" placeholder="Select a channel name" aria-describedby="button-addon2" id="new_channel_name" required>
           <div class="input-group-append">
             <!-- think id below in button to be removed-->
             <button class="btn btn-secondary" type="submit" id="button-addon2">Create</button>
@@ -49,11 +50,13 @@
         <div class="form-group">
           <label for="exampleFormControlSelect2"><h4>Select existing channel</h4></label>
           <select multiple class="form-control" id="exampleFormControlSelect2">
-            <option>1</option>
-            <option>2</option>
-            <option>3</option>
-            <option>4</option>
-            <option>5</option>
+
+            {% for channel in channels %}
+              {% if channel %}
+                <option>{{channel}}</option>
+              {% endif %}
+            {% endfor %}
+
           </select>
         </div>
         <button type="submit" class="btn btn-primary">Select</button>
