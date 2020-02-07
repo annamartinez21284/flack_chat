@@ -20,23 +20,23 @@ def index():
 # Global variable for channels
 channels = []
 
-@app.route("/get_channels", methods = ["GET", "POST"])
-def get_channels():
-
-  return json.dumps(channels)
-
 @app.route("/chat", methods=["GET", "POST"])
 def chat():
-  
   if request.method == "POST":
     new_channel = request.form.get("new_channel_name")
-    print("THIS IS THE CHANNEL")
-    print(new_channel)
-    channels.append(new_channel)
-  print("THESE ARE THE CHANNELS")
-  print(channels)
+    print("THESE ARE THE CHANNELS")
+    print(channels)
+    if new_channel in channels:
+      return jsonify({"channel_exists": True});
+    
+    else:
+      print("ADDING NEW CHANNEL:")
+      print(new_channel)
+      channels.append(new_channel)
+      return json.dumps(channels)
 
   return render_template("chat.html", channels = channels)
+
 
 @socketio.on("send") # "send" is event to be broadcasted & defined in client-side emit() (1st argument)
 def send(data): # data should include channel & message (2nd argument in {})
