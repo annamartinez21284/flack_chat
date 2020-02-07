@@ -1,8 +1,16 @@
+display_name = localStorage.getItem('display_name');
+if (display_name == null) {
+  window.location.assign('/');
+}
+
+function newXHR(){
+    return new XMLHttpRequest(); // only for standard-compliant browsers
+    // would need ActiveXObject for IE? https://stackoverflow.com/questions/11502244/reuse-xmlhttprequest-object-or-create-a-new-one
+}
+
 document.addEventListener('DOMContentLoaded', () => {
 
-        document.querySelector('#display_name').innerHTML = localStorage.getItem('display_name');
-
-        // IF USER ALREADY IS ON CHANNEL
+        document.querySelector('#display_name').innerHTML = display_name;
 
         // IF USER SWITCHES / SELECTS EXISTING CHANNEL
 
@@ -17,12 +25,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
           // STEP1: get channel list from server - PROB BETTER ALL SERVER-SIDE SINCE LIST NEEDS FETCHING FROM IT ANYWAY
-          const request2 = new XMLHttpRequest();
-          request2.open('GET', '/get_channels');
+          const r1 = newXHR();
+          r1.open('GET', '/get_channels');
           // callback function: when request completed,
-          request2.onload = () => {
+          r1.onload = () => {
             // extract list in JSON format from request (returned by get_channels() in application.py)
-            const response = JSON.parse(request2.responseText);
+            const response = JSON.parse(r1.responseText);
             console.log(`RESPONSE FROM SERVER IS: ${response}`);
             // look for channel in returned array
             if (response.find(function(element) {return element == new_channel_name;}))
@@ -32,51 +40,35 @@ document.addEventListener('DOMContentLoaded', () => {
               document.getElementById('new_channel').reset();
               // check with server if channel name already exists (AJAX request)
               alert("Channel already exists"); // this always gets called & then goes on to else
-
               return false;
               }
             else {
               // send new channel name to server
-              const request1 = new XMLHttpRequest(); // DO I NEED 2 request objects?
-              request1.open('POST', '/chat');
+              const r2 = newXHR(); // DO I NEED 2 request objects?
+              r2.open('POST', '/chat');
               const data = new FormData();
               data.append('new_channel_name', new_channel_name);
               console.log(`SENDING ${new_channel_name} TO SERVER`);
-              request1.send(data);
+              r2.send(data);
               // create new HTML item for channel list & append
               const option = document.createElement('option');
               option.innerHTML = new_channel_name;
               document.querySelector('select').append(option);
 
+              // connect to websocket and tell Socket.IO client to connect to chosen channel name
               var socket = io(`/${new_channel_name}`);
               socket.on('connect', () => {
                 console.log(`CONNECTED TO NAMESPACE:${socket.nsp}`); // or .nsp.name
 
+
               });
               // empty input field (reset form)
+              console.log(`SOCKET CONNECTED: ${socket.connected}`);
               document.getElementById('new_channel').reset();
             }
+
           };
-          request2.send();
-
-
-
-          // save channel on server
-          //const request3 = new XMLHttpRequest();
-          //request3.open('POST', '/chat');
-          //request3.send(new_channel_name); // this isnt being sent
-
-
-
-
-
-          // connect to websocket and tell Socket.IO client to connect to chosen channel name (path)
-          //var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port,  {'path': `/${new_channel_name}.io` });// is here the right place where i initialise path url?
-          //var socket = io.of('new_channel_name'); // this is server-side code??
-          //var socket = io(`/${new_channel_name}`);
-          //var socket = io();
-          //var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
-          // once, connected, do...
+          r1.send();
 
           return false;
           };

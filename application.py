@@ -27,9 +27,9 @@ def get_channels():
 
 @app.route("/chat", methods=["GET", "POST"])
 def chat():
-  # if no display name redirect to "/" - OR DO THIS IN JS
+  
   if request.method == "POST":
-    new_channel = request.form.get("new_channel_name") # WHY ARE CHANNELS NOT STORED & ADDED??
+    new_channel = request.form.get("new_channel_name")
     print("THIS IS THE CHANNEL")
     print(new_channel)
     channels.append(new_channel)
