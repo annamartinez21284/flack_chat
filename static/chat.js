@@ -51,6 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
               var socket = io(`/${new_channel_name}`);
               socket.on('connect', () => {
                 console.log(`CONNECTED TO NAMESPACE:${socket.nsp}`); // or .nsp.name
+                console.log(`SOCKET CONNECTED = ${socket.connected}`);
 
               });
               // empty input field (reset form)
