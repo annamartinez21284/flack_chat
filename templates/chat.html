@@ -20,7 +20,6 @@
   </head>
 
 
-
 <body>
   <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
     <a class="navbar-brand" >Flack CS50W</a>
@@ -46,14 +45,14 @@
         </div>
       </form>
 
-      <form>
+      <form name="select_channel" id="select_channel" method="POST">
         <div class="form-group">
           <label for="exampleFormControlSelect2"><h4>Select existing channel</h4></label>
-          <select multiple class="form-control" id="exampleFormControlSelect2">
+          <select multiple class="form-control" id="exampleFormControlSelect2" name="channel_selection">
 
             {% for channel in channels %}
               {% if channel %}
-                <option>{{channel}}</option>
+                <option value="{{channel}}">{{channel}}</option>
               {% endif %}
             {% endfor %}
 
@@ -68,9 +67,9 @@
     <div class="col-sm">
       <br>
       <div class="jumbotron">
-        <h4 >Chat on Channel: XXXXX</h4>
+        <h4> Chat on Channel: <span id="current_channel"><i>No channel selected</i></span></h4>
 
-        <div class="scrollarea">
+        <div id="chat_window" class="scrollarea">
           <div class="container">
             <p>Hello. How are you today?bbbbbbbbbbbbbbbbbbbbaaa bla bla bal bla</p>
             <span class="time-right">11:00</span>
@@ -84,15 +83,16 @@
         </div>
 
         <br>
-        <form>
+        <form id="send_message">
           <br>
           <div class="input-group mb-3">
-            <textarea type="text" class="form-control" placeholder="New message" aria-describedby="button-addon2"> </textarea>
+            <textarea id="message" type="text" class="form-control" placeholder="New message" aria-describedby="button-addon2"> </textarea>
             <div class="input-group-append">
               <button class="btn btn-secondary" type="submit" >Send</button>
             </div>
           </div>
         </form>
+
       </div>
 
     </div>

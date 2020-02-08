@@ -1,6 +1,6 @@
 // if the user already has a display name, redirect to chat
 if (localStorage.getItem('display_name')!= null)
-  { window.location.assign('/chat');
+  { window.location.assign('/select_channel');
   localStorage.setItem('display_name');}
   // ... ->then in chat.html set name in the DOM
 
@@ -10,7 +10,7 @@ else {
     document.querySelector('#new').onsubmit = function () {
       const dname = document.querySelector('#display_name').value;
       localStorage.setItem('display_name', dname);
-      window.location.replace('/chat');
+      window.location.replace('/select_channel');
     };
 
   });
