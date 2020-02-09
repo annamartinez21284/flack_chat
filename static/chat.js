@@ -26,7 +26,7 @@ function connectSocket(channel) {
       var message = document.querySelector('#message').value;
       console.log(`MESSAGE IS ${message}`);
       // so far above this works
-      socket.emit('send', {'message': message, "namespace": `/${channel}`}); // need display_name, time.. butnot channel.. , too?
+      socket.emit('send', {'message': message}); // need display_name, time.. butnot channel.. , too?
       return false;
       document.createElement('div');
       document.createElement('p');
