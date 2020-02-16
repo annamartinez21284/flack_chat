@@ -16,6 +16,22 @@
     <link href="/static/css/styles.css" rel="stylesheet">
 
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.min.js"></script>
+
+    <script id="chat_log" type="text/template">
+      {% raw -%}
+
+              {{#each values}}
+              <div class=container>
+                    <b> {{this.sender}}: </b>
+                    <p>{{this.text}}</p>
+                  <span class="time-left">{{this.time}}<span>
+                </div>
+              {{/each}}
+
+      {%- endraw %}
+    </script>
+
     <script src="{{ url_for('static', filename='chat.js') }}"></script>
   </head>
 
@@ -70,15 +86,8 @@
         <h4> Chat on Channel: <span id="current_channel"><i>No channel selected</i></span></h4>
 
         <div id="chat_window" class="scrollarea">
-          <div class="container">
-            <p>Hello. How are you today?bbbbbbbbbbbbbbbbbbbbaaa bla bla bal bla</p>
-            <span class="time-right">11:00</span>
-          </div>
 
-          <div class="container darker">
-            <p>Hey! I'm fine. Thanks for asking!</p>
-            <span class="time-left">11:01</span>
-          </div>
+          <!-- HERE'S WHEERE THE CHAT WINDOW IS-->
 
         </div>
 

@@ -11,18 +11,19 @@ function newXHR() {
     // would need ActiveXObject for IE? https://stackoverflow.com/questions/11502244/reuse-xmlhttprequest-object-or-create-a-new-one
 }
 
+const template = Handlebars.compile(document.querySelector('#chat_log').innerHTML);
+
 document.addEventListener('DOMContentLoaded', () => {
-  // display display_name in top right corner
+
   var sid = "";
   document.querySelector('#display_name').innerHTML = display_name;
   var socket = io();
-  // --------------------------------
+
   socket.on('connect', function () {
     sid = socket.id;
     console.log(`SID is: ${sid} AND THIS SHOULD ONLY EVER APPEAR ONCE AND NEVER CHANGE`);
 
     });
-  // ----------------------------------
 
   // IF USER SWITCHES / SELECTS EXISTING CHANNEL
   document.querySelector('#select_channel').onsubmit = () => {
@@ -33,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     r2.open('POST', '/select_channel');
     const data = new FormData();
     data.append('channel', channel);
+    data.append('participant', display_name);
     console.log(`SENDING SWITCH TO ${channel} TO SERVER`);
     r2.onload = () => {
       //const response = JSON.parse(r2.responseText); - DON@T NEED RESPONSE TEXT HERE DO I?
@@ -66,8 +68,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return false; // here necessary?
   }
 
-
-
   // IF USER CREATES NEW CHANNEL
   document.querySelector('#new_channel').onsubmit = () => {
     // stop browser default behaviour (submission of form to server), but NOT propagation to DOM (return false; would)
@@ -81,6 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
     r1.open('POST', '/new_channel');
     const data = new FormData();
     data.append('new_channel_name', new_channel_name);
+    data.append('participant', display_name);
     console.log(`SENDING ${new_channel_name} TO SERVER`);
     r1.onload = () => {
       const response = JSON.parse(r1.responseText);
@@ -127,40 +128,51 @@ document.addEventListener('DOMContentLoaded', () => {
     return false;
   };
 
-//-------------------
-  // broadcast sent message NONE OF THE BELOW WORKS (havent emitted!), ALSO ENSURE MSG FIELD ONLY CLEAR WHEN CONNECTED TO CHANNEL
+  // broadcast sent message, LATER: ENSURE MSG FIELD ONLY CLEAR WHEN CONNECTED TO CHANNEL
   document.querySelector('#send_message').onsubmit = () => {
     var message = document.querySelector('#message').value;
+    var today = new Date();
+    var time = today.getHours() + ":" + today.getMinutes();
+    var sender = display_name;
     console.log(`MESSAGE IS ${message}`);
     console.log(`ROOM is ${localStorage.getItem('channel')}`);
-    // so far above this works
-    socket.emit('send', {'message': message, 'room': localStorage.getItem('channel')}); // need sender,. butnot channel.. , too?
+    socket.emit('send', {'message': message, 'time': time, 'sender': sender, 'room': localStorage.getItem('channel')}); // need sender,. butnot channel.. , too?
     console.log(`SENDING ${message} ONCE OR MORE?`); // only once
     return false;
   }
 
-  socket.on('broadcast message', function handle_broadcast (data) {
+  socket.on('display_messages', function handle_messagelog (data) {
     console.log(data);
 
+    document.querySelector('#chat_window').innerHTML = "";
+    var message_log = data;
+    const element = template({'values': message_log});
+    document.querySelector('#chat_window').innerHTML += element;
+
+  });
+
+  socket.on('broadcast message', function handle_broadcast (data) {
+    console.log(data);
 
     const div = document.createElement('div');
     const p = document.createElement('p');
     const span = document.createElement('span');
+    const b = document.createElement('b');
+    b.innerHTML = data.sender + ": ";
     p.innerHTML = data.message;
     var today = new Date();
     var time = today.getHours() + ":" + today.getMinutes();
     span.innerHTML = time;
     span.setAttribute('class', 'time-left');
+
+    div.appendChild(b);
     div.appendChild(p);
     div.appendChild(span);
     div.setAttribute('class', 'container');
     document.querySelector('#chat_window').append(div);
     document.getElementById('message').value = "";
-    return false;
+    return false; // not needed i think
 
   });
-
-//-----------------
-
 
 });
