@@ -1,8 +1,14 @@
 // get name, if none, redirect to index.html
 display_name = localStorage.getItem('display_name');
-if (display_name == null) {
-  window.location.assign('/');
+
+function loggedin () {
+  if (localStorage.getItem('display_name') == null) {
+    window.location.assign('/');
+  }
 }
+
+loggedin();
+
 
 // standard function for creating separate request objects and call this for each AJAX task
 // https://stackoverflow.com/questions/11502244/reuse-xmlhttprequest-object-or-create-a-new-one
@@ -11,61 +17,70 @@ function newXHR() {
     // would need ActiveXObject for IE? https://stackoverflow.com/questions/11502244/reuse-xmlhttprequest-object-or-create-a-new-one
 }
 
+// timestamp formatting for minutes
+function addZero(i) {
+  if (i < 10) {
+    i = "0" + i;
+  }
+  return i;
+}
+
 const template = Handlebars.compile(document.querySelector('#chat_log').innerHTML);
+var current_channel = null;
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  var sid = "";
   document.querySelector('#display_name').innerHTML = display_name;
-  var socket = io();
 
+  // disable sending messages if no channel selected
+  if (current_channel == null || current_channel == undefined)
+    {
+      document.querySelector('#send_button').disabled = true;
+    }
+
+  // connect socket and store socket ID
+  var sid = "";
+  var socket = io();
   socket.on('connect', function () {
     sid = socket.id;
-    console.log(`SID is: ${sid} AND THIS SHOULD ONLY EVER APPEAR ONCE AND NEVER CHANGE`);
-
+    console.log(`SID is: ${sid}`);
     });
 
   // IF USER SWITCHES / SELECTS EXISTING CHANNEL
   document.querySelector('#select_channel').onsubmit = () => {
     var channel = document.querySelector('select').value;
-    console.log(`CHANNEL SELECTED: ${channel}`);
+
     // Tell server which channel selected
     const r2 = newXHR();
     r2.open('POST', '/select_channel');
     const data = new FormData();
     data.append('channel', channel);
-    data.append('participant', display_name);
-    console.log(`SENDING SWITCH TO ${channel} TO SERVER`);
     r2.onload = () => {
-      //const response = JSON.parse(r2.responseText); - DON@T NEED RESPONSE TEXT HERE DO I?
-      //console.log(`JSON RESPONSE TO CHANNEL EXISTS? ${JSON.parse(r1.responseText)}`);
-      //----------------------------------
-      if (localStorage.getItem('channel') != null)
+      if (current_channel != null && current_channel != undefined)
         {
-          socket.emit('leave', {'room': localStorage.getItem('channel'), 'username': display_name, 'sid': sid});
-          console.log(`LEAVING ROOM? ${localStorage.getItem('channel')}`); // guess stays connected just room switch?
-          console.log(`SID IS NOW: ${sid}`);
+          socket.emit('leave', {'room': current_channel, 'username': display_name, 'sid': sid});
+          console.log(`LEAVING ROOM ${current_channel} on SID ${sid}`);
         }
 
       socket.emit('join', {'room': channel, 'username': display_name, 'sid': sid});
-      console.log(`AND NOW SID IS: ${sid}`);
 
-      localStorage.setItem('channel', channel);
+      current_channel = channel;
+
       const data = new FormData();
       data.append('username', display_name);
       data.append('room', channel);
       data.append('sid', sid);
 
-      console.log(`CONNECTED TO ROOM:${localStorage.getItem('channel')}`); // this not working
+      console.log(`CONNECTED TO ROOM:${current_channel}`);
       // empty input field (reset form)
-      console.log(`SOCKET CONNECTED: ${socket.connected}`);
-      document.querySelector('#current_channel').innerHTML = channel;
-
-      //------------------------------------
+      document.querySelector('#current_channel').innerHTML = "Connected to " + channel;
     };
     r2.send(data);
+
+
     document.getElementById('select_channel').reset();
-    return false; // here necessary?
+    document.querySelector('#send_button').disabled = false;
+    return false;
   }
 
   // IF USER CREATES NEW CHANNEL
@@ -100,79 +115,82 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('select').append(option);
 
         // connect to websocket and tell Socket.IO client to connect to chosen channel name
-        //--------------------------------
-        if (localStorage.getItem('channel') != null)
+        if (current_channel != null && current_channel != undefined)
           {
-            socket.emit('leave', {'room': localStorage.getItem('channel'), 'username': display_name, 'sid': sid});
-            console.log(`LEAVING ROOM? ${localStorage.getItem('channel')}`); // guess stays connected just room switch?
-            console.log(`SID IS NOW: ${sid}`);
+            socket.emit('leave', {'room': current_channel, 'username': display_name, 'sid': sid});
+            console.log(`LEAVING ROOM: ${current_channel}, SID IS: ${sid}`);
           }
 
         socket.emit('join', {'room': new_channel_name, 'username': display_name, 'sid': sid});
         console.log(`AND NOW, WITH NEW CHANNEL, SID IS: ${sid}`);
-        localStorage.setItem('channel', new_channel_name);
+        current_channel = new_channel_name;
+
         const data = new FormData();
         data.append('username', display_name);
         data.append('room', new_channel_name);
         data.append('sid', sid);
 
-        console.log(`CONNECTED TO ROOM:${localStorage.getItem('channel')}`); // this not working
+        console.log(`CONNECTED TO ROOM:${current_channel}`);
         // empty input field (reset form)
-        console.log(`SOCKET CONNECTED: ${socket.connected}`);
-        document.querySelector('#current_channel').innerHTML = new_channel_name;
-        //----------------------------
+        document.querySelector('#current_channel').innerHTML = "Connected to " + new_channel_name;
         document.getElementById('new_channel').reset();
       }
     };
     r1.send(data);
+    document.querySelector('#send_button').disabled = false;
+
     return false;
   };
+
+  // Allow Enter key to submit message
+  var message = document.getElementById("message");
+  message.addEventListener("keyup", (e) => {
+    if (e.keyCode === 13)
+    {e.preventDefault();
+    document.getElementById("send_button").click();}
+  });
 
   // broadcast sent message, LATER: ENSURE MSG FIELD ONLY CLEAR WHEN CONNECTED TO CHANNEL
   document.querySelector('#send_message').onsubmit = () => {
     var message = document.querySelector('#message').value;
     var today = new Date();
-    var time = today.getHours() + ":" + today.getMinutes();
+    var time = today.getHours() + ":" + addZero(today.getMinutes());
     var sender = display_name;
-    console.log(`MESSAGE IS ${message}`);
-    console.log(`ROOM is ${localStorage.getItem('channel')}`);
-    socket.emit('send', {'message': message, 'time': time, 'sender': sender, 'room': localStorage.getItem('channel')}); // need sender,. butnot channel.. , too?
-    console.log(`SENDING ${message} ONCE OR MORE?`); // only once
+    socket.emit('send', {'message': message, 'time': time, 'sender': sender, 'room': current_channel});
     return false;
   }
 
   socket.on('display_messages', function handle_messagelog (data) {
-    console.log(data);
-
-    document.querySelector('#chat_window').innerHTML = "";
-    var message_log = data;
-    const element = template({'values': message_log});
-    document.querySelector('#chat_window').innerHTML += element;
+    const chatWindow = document.querySelector('#chat_window');
+    chatWindow.innerHTML = "";
+    const element = template({'values': data});
+    chatWindow.innerHTML += element;
+    chatWindow.scrollTop = chatWindow.scrollHeight;
 
   });
 
   socket.on('broadcast message', function handle_broadcast (data) {
-    console.log(data);
-
     const div = document.createElement('div');
     const p = document.createElement('p');
     const span = document.createElement('span');
     const b = document.createElement('b');
     b.innerHTML = data.sender + ": ";
     p.innerHTML = data.message;
-    var today = new Date();
-    var time = today.getHours() + ":" + today.getMinutes();
-    span.innerHTML = time;
+    span.innerHTML = data.time;
     span.setAttribute('class', 'time-left');
-
     div.appendChild(b);
     div.appendChild(p);
     div.appendChild(span);
     div.setAttribute('class', 'container');
-    document.querySelector('#chat_window').append(div);
+    const chatWindow = document.querySelector('#chat_window');
+    chatWindow.append(div);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
     document.getElementById('message').value = "";
-    return false; // not needed i think
-
   });
+
+  document.querySelector('#exit_button').onclick = () => {
+    localStorage.clear();
+    loggedin();
+  }
 
 });

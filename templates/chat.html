@@ -41,7 +41,7 @@
     <a class="navbar-brand" >Flack CS50W</a>
     <a class="navbar-text">    Logged in as <div id="display_name"></div> </a>
     <div class="collapse navbar-collapse" id="navbarCollapse">
-        <button class="nav-item ml-auto" href="" >Exit</button>
+        <button class="nav-item ml-auto" id="exit_button" href="" >Exit</button>
     </div>
   </nav>
 
@@ -55,7 +55,6 @@
         <div class="input-group mb-3">
           <input type="text" class="form-control" placeholder="Select a channel name" aria-describedby="button-addon2" id="new_channel_name" required>
           <div class="input-group-append">
-            <!-- think id below in button to be removed-->
             <button class="btn btn-secondary" type="submit" id="button-addon2">Create</button>
           </div>
         </div>
@@ -83,9 +82,11 @@
     <div class="col-sm">
       <br>
       <div class="jumbotron">
-        <h4> Chat on Channel: <span id="current_channel"><i>No channel selected</i></span></h4>
+        <h4> <span id="current_channel"><i>Select a channel to chat</i></span></h4>
+        <br>
 
         <div id="chat_window" class="scrollarea">
+
 
           <!-- HERE'S WHEERE THE CHAT WINDOW IS-->
 
@@ -95,9 +96,9 @@
         <form id="send_message">
           <br>
           <div class="input-group mb-3">
-            <textarea id="message" type="text" class="form-control" placeholder="New message" aria-describedby="button-addon2"> </textarea>
+            <textarea id="message" type="text" class="form-control" placeholder="New message"></textarea>
             <div class="input-group-append">
-              <button class="btn btn-secondary" type="submit" >Send</button>
+              <button class="btn btn-secondary" type="submit" id="send_button">Send</button>
             </div>
           </div>
         </form>

@@ -68,10 +68,40 @@
 
   width: 440px;
   height: 300px;
-  overflow: scroll;
+  overflow: auto;
 
+  margin-right: 15px;
+  margin-left: 15px;
+  margin-top: 50px;
 
 }
+
+#chat-window {
+
+  width: 440px;
+  height: 300px;
+  overflow: auto;
+
+  margin-right: 15px;
+  margin-left: 15px;
+  margin-top: 50px;
+
+}
+
+.myrow{
+  display:-webkit-box;
+  display:-ms-flexbox;
+  display:flex;
+  -ms-flex-wrap:wrap;
+  flex-wrap:wrap;
+  margin-right:15px;
+  margin-left:15px;
+  margin-bottom: 200px;
+  margin-top: 80px;
+}
+
+
+
 
 p {
     font-size: 14px;
