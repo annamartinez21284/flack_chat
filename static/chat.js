@@ -1,6 +1,9 @@
-// get name, if none, redirect to index.html
-display_name = localStorage.getItem('display_name');
+// get name & channel, if none, redirect to index.html
+const display_name = localStorage.getItem('display_name');
+var current_channel = localStorage.getItem('current_channel');
 
+
+// redirect user to index if not stored (by display_name)
 function loggedin () {
   if (localStorage.getItem('display_name') == null) {
     window.location.assign('/');
@@ -26,17 +29,19 @@ function addZero(i) {
 }
 
 const template = Handlebars.compile(document.querySelector('#chat_log').innerHTML);
-var current_channel = null;
+
 
 document.addEventListener('DOMContentLoaded', () => {
 
   document.querySelector('#display_name').innerHTML = display_name;
+  const chatWindow = document.querySelector('#chat_window');
 
   // disable sending messages if no channel selected
   if (current_channel == null || current_channel == undefined)
     {
       document.querySelector('#send_button').disabled = true;
     }
+
 
   // connect socket and store socket ID
   var sid = "";
@@ -46,15 +51,31 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log(`SID is: ${sid}`);
     });
 
+  // IF USER WAS ALREADY CONNECTED TO CHANNEL, RECONNECT HIM THERE
+  function reconnect () {
+    if (localStorage.getItem('current_channel') != null && localStorage.getItem('current_channel') != undefined) {
+      const r = newXHR();
+      r.open('POST', '/select_channel');
+      const data = new FormData();
+      data.append('channel', current_channel);
+      r.onload = () => {
+          socket.emit('join', {'room': current_channel, 'username': display_name, 'sid': sid});
+          document.querySelector('#current_channel').innerHTML = "Connected to " + current_channel;
+      };
+      r.send();
+      document.querySelector('#send_button').disabled = false;
+    }
+  }
+  reconnect();
+
+
   // IF USER SWITCHES / SELECTS EXISTING CHANNEL
   document.querySelector('#select_channel').onsubmit = () => {
-    var channel = document.querySelector('select').value;
+    current_channel = document.querySelector('select').value;
 
     // Tell server which channel selected
     const r2 = newXHR();
     r2.open('POST', '/select_channel');
-    const data = new FormData();
-    data.append('channel', channel);
     r2.onload = () => {
       if (current_channel != null && current_channel != undefined)
         {
@@ -62,21 +83,13 @@ document.addEventListener('DOMContentLoaded', () => {
           console.log(`LEAVING ROOM ${current_channel} on SID ${sid}`);
         }
 
-      socket.emit('join', {'room': channel, 'username': display_name, 'sid': sid});
+      socket.emit('join', {'room': current_channel, 'username': display_name, 'sid': sid});
 
-      current_channel = channel;
-
-      const data = new FormData();
-      data.append('username', display_name);
-      data.append('room', channel);
-      data.append('sid', sid);
-
-      console.log(`CONNECTED TO ROOM:${current_channel}`);
-      // empty input field (reset form)
-      document.querySelector('#current_channel').innerHTML = "Connected to " + channel;
+      localStorage.setItem('current_channel', current_channel);
+      console.log(`CONNECTED TO ROOM:${localStorage.getItem('current_channel')}`);
+      document.querySelector('#current_channel').innerHTML = "Connected to " + current_channel;
     };
-    r2.send(data);
-
+    r2.send();
 
     document.getElementById('select_channel').reset();
     document.querySelector('#send_button').disabled = false;
@@ -96,7 +109,6 @@ document.addEventListener('DOMContentLoaded', () => {
     r1.open('POST', '/new_channel');
     const data = new FormData();
     data.append('new_channel_name', new_channel_name);
-    data.append('participant', display_name);
     console.log(`SENDING ${new_channel_name} TO SERVER`);
     r1.onload = () => {
       const response = JSON.parse(r1.responseText);
@@ -105,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // empty input field (reset form)
         document.getElementById('new_channel').reset();
         // check with server if channel name already exists (AJAX request)
-        alert("Channel already exists"); // this always gets called & then goes on to else
+        alert("Channel already exists");
         return false;
       }
       else {
@@ -122,8 +134,8 @@ document.addEventListener('DOMContentLoaded', () => {
           }
 
         socket.emit('join', {'room': new_channel_name, 'username': display_name, 'sid': sid});
-        console.log(`AND NOW, WITH NEW CHANNEL, SID IS: ${sid}`);
         current_channel = new_channel_name;
+        localStorage.setItem('current_channel', current_channel);
 
         const data = new FormData();
         data.append('username', display_name);
@@ -150,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById("send_button").click();}
   });
 
-  // broadcast sent message, LATER: ENSURE MSG FIELD ONLY CLEAR WHEN CONNECTED TO CHANNEL
+  // broadcast sent message
   document.querySelector('#send_message').onsubmit = () => {
     var message = document.querySelector('#message').value;
     var today = new Date();
@@ -161,33 +173,105 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   socket.on('display_messages', function handle_messagelog (data) {
-    const chatWindow = document.querySelector('#chat_window');
     chatWindow.innerHTML = "";
-    const element = template({'values': data});
+    // populate JS template (Handelbars) with data (message log)
+    console.log(`DATA COMES AS: ${data}`);
+    var i =0;
+    for (i=0; i<data.length; i++){
+      console.log(data[i]);}
+    const element = template({'values': data}); // here add display_name to tell Handlebars template whether to add Delete button!
+
     chatWindow.innerHTML += element;
+
+    // have scrollbar always at the bottom
     chatWindow.scrollTop = chatWindow.scrollHeight;
 
   });
 
+ // broadcast message to all connected clients
   socket.on('broadcast message', function handle_broadcast (data) {
-    const div = document.createElement('div');
-    const p = document.createElement('p');
-    const span = document.createElement('span');
-    const b = document.createElement('b');
-    b.innerHTML = data.sender + ": ";
-    p.innerHTML = data.message;
-    span.innerHTML = data.time;
-    span.setAttribute('class', 'time-left');
-    div.appendChild(b);
-    div.appendChild(p);
-    div.appendChild(span);
-    div.setAttribute('class', 'container');
-    const chatWindow = document.querySelector('#chat_window');
-    chatWindow.append(div);
+
+    const element = template({'values': data});
+    console.log(`DATA in BROADCAST COMES AS: ${data}`);
+    var i =0;
+    for (i=0; i<data.length; i++){
+      console.log(data[i]);}
+    chatWindow.innerHTML += element;
+
+    // const div = document.createElement('div');
+    // const p = document.createElement('p');
+    // const span1 = document.createElement('span');
+    // const span2 = document.createElement('span');
+    // const a = document.createElement('a');
+    // const b = document.createElement('b');
+    // b.innerHTML = data.sender + ": ";
+    // p.innerHTML = data.message;
+    // span1.innerHTML = data.time;
+    // span2.innerHTML = a;
+    // a.innerHTML = "Delete";
+    // a.href =""; //note needed since i use onclick
+    // span1.setAttribute('class', 'time-left');
+    // span2.setAttribute('class', 'time-right');
+    // div.appendChild(b);
+    // div.appendChild(p);
+    // div.appendChild(span1);
+    // if (data.sender == display_name) {
+    //   div.appendChild(span2);
+    //   span2.appendChild(a);
+    // }
+    // div.setAttribute('class', 'container');
+    // chatWindow.append(div);
+
     chatWindow.scrollTop = chatWindow.scrollHeight;
     document.getElementById('message').value = "";
   });
 
+  // delete message
+
+  // Event delegation - live saving!!!!!!!!
+  chatWindow.addEventListener("click", function (e) {
+    e.preventDefault();
+    // e.target is the clicked element!!
+    if (e.target.classList.contains("delete_message")) // THIS DOESN'T PICK UP, OK SOMETIMES IT DOES
+      {
+        const span = e.target.parentElement;
+        const div = span.parentElement;
+        const sender = div.firstChild.nextSibling;
+
+        console.log(`SENDER IS: ${sender.innerHTML.trim()}`);
+        console.log(`DISPLAY_NAME IS ${display_name}`);
+        if (sender.innerHTML.trim() != display_name) {
+          alert("You can only delete own messages.");
+          return false;
+        }
+        else {
+          console.log(`DELETING ${div.firstChild.nextSibling.nextSibling.innerHTML}`);
+          // below no longer needed as onload will instantly remove from view
+          //var str = "<i>MESSAGE DELETED</i>";
+          //var msg = sender.nextSibling.nextSibling;
+          //msg.innerHTML = str;
+          // DO SERVER STUFF
+          const r3 = newXHR();
+          r3.open('POST', '/delete_message');
+          const data = new FormData();
+          var msg_id = msg.nextSibling.innerHTML;
+          console.log(`MESSAGE ID TO DELETE: ${msg_id}`);
+          data.append('msg_id', msg_id);
+          r3.onload = () => {
+            // reload all messages without deleted ones - aka re-join room to broadcast
+            socket.emit('join', {'room': current_channel, 'username': display_name, 'sid': sid});
+          }
+          r3.send(data);
+
+
+        }
+
+      }
+    });
+
+
+
+  // exit chat app by clearing display_names
   document.querySelector('#exit_button').onclick = () => {
     localStorage.clear();
     loggedin();

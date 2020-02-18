@@ -17,19 +17,21 @@
 
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.min.js"></script>
+    <script src="{{ url_for('static', filename='handlebars_compare.js') }}"> </script>
 
     <script id="chat_log" type="text/template">
+
       {% raw -%}
+        {{#each values}}
+        <div class=container>
+            <b>{{this.sender}}</b><b>:</b><p>{{this.text}}</p><p hidden>{{this.id}}</p>
+            <span class="time-left">{{this.time}}</span>
+            <span class="time-right"><a class="delete_message" href="">Delete</a></span>
+        </div>
 
-              {{#each values}}
-              <div class=container>
-                    <b> {{this.sender}}: </b>
-                    <p>{{this.text}}</p>
-                  <span class="time-left">{{this.time}}<span>
-                </div>
-              {{/each}}
-
+        {{/each}}
       {%- endraw %}
+
     </script>
 
     <script src="{{ url_for('static', filename='chat.js') }}"></script>
@@ -60,7 +62,7 @@
         </div>
       </form>
 
-      <form name="select_channel" id="select_channel" method="POST">
+      <form name="select_channel" id="select_channel">
         <div class="form-group">
           <label for="exampleFormControlSelect2"><h4>Select existing channel</h4></label>
           <select multiple class="form-control" id="exampleFormControlSelect2" name="channel_selection">
