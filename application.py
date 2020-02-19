@@ -76,19 +76,34 @@ def new_channel():
 
   return render_template("chat.html", channels = channelnames)
 
-@app.route("/delete_message", methods=["GET", "POST"])
+@app.route("/delete_message", methods=["GET", "POST"]) # this needs to get passed message details here
 def delete_message():
   id = request.form.get("msg_id")
-  # find Channel object to delete message from
-  c = next((c for c in channels if c.name == session["channel"]), None)
-  # iterate over message_log to match message ID for deletion
+  room = request.form.get("room")
+  # with this id, find the message and delete in Channel's log
+  print("ID IS")
+  print(id)
+  print("CHannel found is:")
+  print(room)
+  c = next((c for c in channels if c.name == room), None)
+
+  print(c.message_log)
   for m in c.message_log:
+    print(f"M.ID is: {m.id}")
     if (int(m.id) == int(id)):
       print(f"DELETING {m.text} with ID: {m.id}")
       i = int(id) -1
       del c.message_log[i]
-      return jsonify({"success": True})
+
+  # reorder messages so deletion as above works again next time. Not ideal, better to do python loop matching m.id...
+  j = 1
+  for m in c.message_log:
+    m.id = j
+    print(f"MESSAGE REORDER: {m.id}")
+    j = j + 1
+    print(f"J is {j}")
   return jsonify({"success": True})
+
 
 
 @socketio.on('join')
@@ -104,6 +119,7 @@ def on_join(data):
     message_list = []
     if (c):
       for message in c.message_log:
+        print(f"PRINITING MESSAGE: {message}") # object...<__main etc
         m_dict = message.__dict__
         message_list.append(m_dict)
     emit("display_messages", json.loads(json.dumps(message_list)), room=room)
@@ -130,6 +146,11 @@ def handle_send(data):
   message_list.append(m_dict)
 
   emit("broadcast message", json.loads(json.dumps(message_list)), room=room)
+
+#@socketio.on('delete')
+#def on_delete(data):
+#  pass
+
 
 if __name__ == '__main__':
   socketio.run(app, debug=True)

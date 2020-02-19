@@ -225,6 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
           var msg_id = msg.nextSibling.innerHTML;
           console.log(`MESSAGE ID TO DELETE: ${msg_id}`);
           data.append('msg_id', msg_id);
+          data.append('room', current_channel);
           r3.onload = () => {
             // reload all messages without deleted ones - aka re-join room to broadcast
             socket.emit('join', {'room': current_channel, 'username': display_name, 'sid': sid});

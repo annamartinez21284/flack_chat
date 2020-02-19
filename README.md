@@ -21,11 +21,13 @@ The files used are:
 
 ## Usage
 
-Instead of setting & exporting flask app, run: 
+Instead of setting & exporting flask app, run:
 
 ```
 python3 application.py
 ```
+
+The way to test it that worked best for me, (because of how Chrome works, I presume), is to have one normal and one incognito window.
 
 
 ## Limitations
