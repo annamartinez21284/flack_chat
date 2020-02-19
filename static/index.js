@@ -2,7 +2,6 @@
 if (localStorage.getItem('display_name')!= null)
   { window.location.assign('/select_channel');
   localStorage.setItem('display_name');}
-  // ... ->then in chat.html set name in the DOM
 
   // if not, get chosen display_name and set it
 else {
